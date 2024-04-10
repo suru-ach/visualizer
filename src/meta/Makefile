@@ -1,9 +1,10 @@
+# this file is to build gen.cpp
+
 a.out:
 	g++ gen.cpp
 	# ./a.out filename
 
 clean:
-	rm *.h a.out
+	rm a.out
 
-# 
 

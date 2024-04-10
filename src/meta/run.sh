@@ -1,3 +1,6 @@
+#
+#   This file generates all templates for cpp file
+#
 #!/bin/bash
 
 make
