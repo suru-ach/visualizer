@@ -1,5 +1,6 @@
 #include "astprinter.h"
 #include "iostream"
+#include <iomanip>
 
 /*
 std::string AstVisitor::visitLiteralExpr(Literal<std::string> *expr) {
@@ -22,7 +23,7 @@ std::string AstVisitor::visitBinaryExpr(Binary<std::string> *expr) {
 */
 
 std::string AstVisitor::visitLiteralExpr(Literal<std::string> *expr) {
-    std::cout << ' ' << expr->value << ' ';
+    std::cout << ' ' << std::setprecision(3) << expr->value << ' ';
     // return std::string{std::string::make_nil_obj()};
     return "";
 }
@@ -51,6 +52,46 @@ std::string AstVisitor::visitBinaryExpr(Binary<std::string> *expr) {
     // return std::string{std::string::make_nil_obj()};
     return "";
 }
+
+// json printer
+Object AstTraverser::visitLiteralExpr(Literal<Object> *expr) {
+    std::cout << "{\n";
+    std::cout << "name: '" << expr->value.toString() << "',\n";
+    std::cout << "}\n";
+    return Object{Object::make_nil_obj()};
+}
+
+Object AstTraverser::visitGroupingExpr(Grouping<Object> *expr) {
+    std::cout << "{\n";
+    std::cout << " g( ";
+    expr->expression->accept(this);
+    std::cout << " ) ";
+    std::cout << "}\n";
+    return Object{Object::make_nil_obj()};
+}
+
+Object AstTraverser::visitUnaryExpr(Unary<Object> *expr) {
+    std::cout << "{\n";
+    std::cout << " name: '" << expr->operation.lexeme << "',\n";
+    std::cout << " children: [\n";
+    expr->right->accept(this);
+    std::cout << "],\n";
+    std::cout << "}\n";
+    return Object{Object::make_nil_obj()};
+}
+
+Object AstTraverser::visitBinaryExpr(Binary<Object> *expr) {
+    std::cout << "{\n";
+    std::cout << " name: '" << expr->operation.lexeme << "',\n";
+    std::cout << " children: [\n";
+    expr->right->accept(this);
+    expr->left->accept(this);
+    std::cout << "],\n";
+    std::cout << "}\n";
+    return Object{Object::make_nil_obj()};
+}
+    
+/*
 
 Object AstTraverser::visitLiteralExpr(Literal<Object> *expr) {
     std::cout << ' ' << expr->value.toString() << ' ';
@@ -78,9 +119,8 @@ Object AstTraverser::visitBinaryExpr(Binary<Object> *expr) {
     std::cout << " ) "; 
     return Object{Object::make_nil_obj()};
 }
-
+*/
 /*
-const tree3D = {
-    
-};
+ *
+ *
 */

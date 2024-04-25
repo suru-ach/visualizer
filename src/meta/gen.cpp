@@ -1,15 +1,16 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <iostream>
 
 using std::string;
 using std::ofstream;
 using std::vector;
-using std::endl;
+using std::cin, std::cerr;
 
 class MetaPrinter {
     public:
-        MetaPrinter(string baseName): baseName{baseName}
+        MetaPrinter(string baseName, vector<string> methods): baseName{baseName}, methods{methods}
             {
                 filename = baseName+".h"; 
                 ost.open(filename, std::ios::out);
@@ -26,22 +27,64 @@ class MetaPrinter {
 
         // helper
         string sub_constructor(string params);
+        static string sub_define(string params);
+        static vector<string> split_by_delimit(string method, char delim = ',');
 
         string filename;
         string baseName;
+        vector<string> methods;
         ofstream ost;
 
+        /*
         vector<string> methods {
-            "Binary:Expr<T>* left, Token operator_, Expr<T>* right",
+            "Binary:Expr<T>* left,Token operator_,Expr<T>* right",
             "Grouping:Expr<T>* expression",
             "Literal:Token value",
-            "Unary:Token operator_, Expr<T>* right"
+            "Unary:Token operator_,Expr<T>* right"
         };
+        */
 };
 
+// split using delimit ','
+
+vector<string> MetaPrinter::split_by_delimit(string method, char delim){
+    vector<string> strings_split;
+
+    // split using delimit ',' or ' '
+    int it = 0;
+    while(it!=-1) {
+        it = method.find(delim);
+        if(it == -1 || it >= method.size()) {
+            strings_split.push_back(method);
+            break;
+        }
+        strings_split.push_back(method.substr(0, it));
+        method = method.substr(it+1, method.size()-it-1);
+    }
+    return strings_split;
+};
+
+string MetaPrinter::sub_define(string str) {
+    vector<string> strings_split = split_by_delimit(str, ',');
+
+    string res = "";
+    for(string dec: strings_split) {
+        res += "\t\t" + dec + ";\n";
+    }
+    return res;
+}
+
 string MetaPrinter::sub_constructor(string str) {
-    cout << str;
-    return str;
+    vector<string> strings_split = split_by_delimit(str, ',');
+
+    string res = "";
+    for(int i=0;i<strings_split.size();i++) {
+        string dec = strings_split[i];
+        const string method = split_by_delimit(dec, ' ')[1];
+        res += method + "(" + method + ")";
+        if(i != strings_split.size() - 1) res+=",";
+    }
+    return res;
 }
 
 void MetaPrinter::header() {
@@ -97,14 +140,11 @@ void MetaPrinter::defineMethods() {
             << "\t\t:" << sub_constructor(params) << " { }\n\n"
             << "\t\tT accept(Visitor<T> *visitor) {\n"
             << "\t\t\treturn visitor->visit" << method << baseName << "(this);\n"
-            << "\t\t}\n";
-
-            // << "// split by ,\n";
-
-        ost << "\t}\n";
+            << "\t\t}\n\n"
+            // define node values.
+            << sub_define(params) << "\n\n"
+            << "};\n";
     }
-    
-    ost << "};\n";
 }
 
 void MetaPrinter::footer() {
@@ -121,8 +161,22 @@ void MetaPrinter::print() {
 }
 
 int main() {
-    MetaPrinter mt {"Expr"};
-    mt.print();
+
+    string baseName, param;
+    int n;
+    try {
+        vector<string> params;
+        cin >> baseName;
+        while(std::getline(cin, param)) {
+            if(param.size()) params.push_back(param);
+        }
+
+        MetaPrinter mt {baseName, params};
+        mt.print();
+
+    } catch(...) {
+        cerr << "Input format wrong";
+    }
 }
 
 /*

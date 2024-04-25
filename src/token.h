@@ -42,6 +42,7 @@ class Object {
     int* nil;
     Object_type type;
     string toString();
+    string lexeme;
     static Object make_num_obj(double num);
     static Object make_str_obj(string str);
     static Object make_bool_obj(bool boolean);
