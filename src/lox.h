@@ -6,6 +6,7 @@
 #define LOX_H_
 
 #include <string>
+#include <vector>
 
 class Lox {
     public:
@@ -18,6 +19,7 @@ class Lox {
         static void report(int line, std::string where, std::string message);
         static bool hadError;
 
+        static std::vector<std::string> tokenStrings;
 };
 
 #endif // !LOX_H_

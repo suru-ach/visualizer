@@ -1,89 +1,108 @@
 #ifndef EXPR_H_
 #define EXPR_H_
-
 #include "token.h"
-#include <string>
+#include <memory>
 
-template <typename T>
+using std::shared_ptr;
+
+template<typename T>
 class Expr;
 
-template <typename T>
-class Literal;
-
-template <typename T>
-class Grouping;
-
-template <typename T>
-class Unary;
-
-template <typename T>
+template<typename T>
 class Binary;
 
-template <typename T>
+template<typename T>
+class Grouping;
+
+template<typename T>
+class Literal;
+
+template<typename T>
+class Unary;
+
+template<typename T>
 class Visitor {
-    public:
-        virtual T visitLiteralExpr(Literal<T> *expr) = 0;
-        virtual T visitGroupingExpr(Grouping<T> *expr) = 0;
-        virtual T visitUnaryExpr(Unary<T> *expr) = 0;
-        virtual T visitBinaryExpr(Binary<T> *expr) = 0;
+	public:
+		virtual T visitBinaryExpr(shared_ptr<Binary<T>> Expr) = 0;
+		virtual T visitGroupingExpr(shared_ptr<Grouping<T>> Expr) = 0;
+		virtual T visitLiteralExpr(shared_ptr<Literal<T>> Expr) = 0;
+		virtual T visitUnaryExpr(shared_ptr<Unary<T>> Expr) = 0;
 };
-
-template <typename T>
+template<typename T>
 class Expr {
-    public:
-        virtual T accept(Visitor<T> *visitor) = 0;
+	public:
+		virtual T accept(shared_ptr<Visitor<T>> visitor) = 0;
 };
 
-template <typename T>
-class Literal : public Expr<T> {
-    public:
-        Literal(T value_): value(value_) {}
-        T accept(Visitor<T> *visitor) {
-            return visitor->visitLiteralExpr(this);
-        }
+template<typename T>
+class Binary :
+    public Expr<T>,
+    public std::enable_shared_from_this<Binary<T>>
+{
+	public:
+		Binary(shared_ptr<Expr<T>> left,Token operator_,shared_ptr<Expr<T>> right)
+		:left(left),operator_(operator_),right(right) { }
 
-        T value;
+		T accept(shared_ptr<Visitor<T>> visitor) {
+			return visitor->visitBinaryExpr(this->shared_from_this());
+		}
+
+		shared_ptr<Expr<T>> left;
+		Token operator_;
+		shared_ptr<Expr<T>> right;
 };
 
-template <typename T>
-class Grouping : public Expr<T> {
-    public:
-        Grouping(Expr<T>* expression_)
-            :expression(expression_) { }
+template<typename T>
+class Grouping : 
+    public Expr<T>,
+    public std::enable_shared_from_this<Grouping<T>>
+{
+	public:
+		Grouping(shared_ptr<Expr<T>> expression)
+		:expression(expression) { }
 
-        T accept(Visitor<T> *visitor) {
-            return visitor->visitGroupingExpr(this);
-        }
+		T accept(shared_ptr<Visitor<T>> visitor) {
+			return visitor->visitGroupingExpr(this->shared_from_this());
+		}
 
-        Expr<T>* expression;
+		shared_ptr<Expr<T>> expression;
+
+
 };
 
-template <typename T>
-class Binary : public Expr<T> {
-    public:
-        Binary(Expr<T>* right_, Token operation_, Expr<T>* left_)
-            :left(left_), right(right_), operation(operation_) { }
+template<typename T>
+class Literal :
+    public Expr<T>,
+    std::enable_shared_from_this<Literal<T>>
+{
+	public:
+		Literal(Object value)
+		:value(value) { }
 
-        T accept(Visitor<T> *visitor) {
-            return visitor->visitBinaryExpr(this);
-        }
+		T accept(shared_ptr<Visitor<T>> visitor) {
+			return visitor->visitLiteralExpr(this->shared_from_this());
+		}
 
-        Expr<T>* left;
-        Token operation;
-        Expr<T>* right;
+		Object value;
+
+
 };
 
-template <typename T>
-class Unary : public Expr<T> {
-    public:
-        Unary(Token operation_, Expr<T>* right_)
-            :operation(operation_), right(right_) { }
+template<typename T>
+class Unary :
+    public Expr<T>,
+    std::enable_shared_from_this<Unary<T>>
+{
+	public:
+		Unary(Token operator_,shared_ptr<Expr<T>> right)
+		:operator_(operator_),right(right) { }
 
-        T accept(Visitor<T> *visitor) {
-            return visitor->visitUnaryExpr(this);
-        }
-        Token operation;
-        Expr<T>* right;
+		T accept(shared_ptr<Visitor<T>> visitor) {
+			return visitor->visitUnaryExpr(this->shared_from_this());
+		}
+
+		Token operator_;
+		shared_ptr<Expr<T>> right;
 };
 
-#endif // !EXPR_H_
+#endif //Expr_H

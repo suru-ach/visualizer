@@ -33,92 +33,119 @@
 */
 
 #include "parser.h"
+#include "Stmt.h"
+#include "token.h"
 #include <stdexcept>
 #include <string>
 #include <iostream>
+#include <vector>
 
-Expr<Object>* Parser::parse() {
+using std::shared_ptr;
+
+vector<shared_ptr<Stmt<Object>>> Parser::parse() {
+
     try {
-        return expression();
+        while(!isAtEnd()) {
+            statements.push_back(statement());
+        }
+        // expression();
     } catch(std::runtime_error err) {
-        return nullptr;
+        return {};
     }
 }
 
-Expr<Object>* Parser::expression() {
+shared_ptr<Stmt<Object>> Parser::statement() {
+    if(match({PRINT})) return printStatement();
+    
+    return expressionStatement();
+}
+
+shared_ptr<Stmt<Object>> Parser::printStatement() {
+    shared_ptr<Expr<Object>> value = expression();
+    consume(SEMICOLON, "Expect ';' after value.");
+    return shared_ptr<Stmt<Object>> (new Print<Object>{value});
+}
+
+shared_ptr<Stmt<Object>> Parser::expressionStatement() {
+    shared_ptr<Expr<Object>> value = expression();
+    consume(SEMICOLON, "Expect ';' after value.");
+    return shared_ptr<Stmt<Object>> (new Expression<Object>{value});
+}
+
+shared_ptr<Expr<Object>> Parser::expression() {
     return equality();
 }
 
-Expr<Object>* Parser::equality() {
-    Expr<Object> *expr = comparision();
+shared_ptr<Expr<Object>> Parser::equality() {
+    shared_ptr<Expr<Object>>expr = comparision();
     while(match({ BANG_EQUAL, EQUAL_EQUAL })) {
         Token token = previous();
-        Expr<Object> *right = comparision();
-        expr = new Binary<Object> { expr, token, right };
+        shared_ptr<Expr<Object>>right = comparision();
+        expr = shared_ptr<Expr<Object>> (new Binary<Object> { expr, token, right });
     }
     return expr;
 }
 
-Expr<Object>* Parser::comparision() {
-    Expr<Object> *expr = term();
+shared_ptr<Expr<Object>> Parser::comparision() {
+    shared_ptr<Expr<Object>>expr = term();
     while(match({ LESS_EQUAL, GREATER_EQUAL, GREATER, LESS })) {
         Token token = previous(); 
-        Expr<Object> *right = term();
-        expr = new Binary<Object> { expr, token, right };
+        shared_ptr<Expr<Object>>right = term();
+        expr = shared_ptr<Expr<Object>> (new Binary<Object> { expr, token, right });
     }
     return expr;
 }
 
-Expr<Object>* Parser::term() {
-    Expr<Object> *expr = factor();
+shared_ptr<Expr<Object>> Parser::term() {
+    shared_ptr<Expr<Object>>expr = factor();
     while(match({ PLUS, MINUS })) {
         Token token = previous();
-        Expr<Object> *right = factor();
-        expr = new Binary<Object> { expr, token, right };
+        shared_ptr<Expr<Object>>right = factor();
+        expr = shared_ptr<Expr<Object>> (new Binary<Object> { expr, token, right });
     }
     return expr;
 }
 
-Expr<Object>* Parser::factor() {
-    Expr<Object> *expr = unary();
+shared_ptr<Expr<Object>> Parser::factor() {
+    shared_ptr<Expr<Object>>expr = unary();
     while(match({ STAR, SLASH })) {
         Token token = previous(); 
-        Expr<Object> *right = unary();
-        expr = new Binary<Object> { expr, token, right };
+        shared_ptr<Expr<Object>>right = unary();
+        expr = shared_ptr<Expr<Object>> (new Binary<Object> { expr, token, right });
     }
     return expr;
 }
 
-Expr<Object>* Parser::unary() {
+shared_ptr<Expr<Object>> Parser::unary() {
     if(match({ BANG, MINUS })) {
         Token token = previous();
-        Expr<Object> *right = primary();
-        return new Unary<Object> {token, right};
+        shared_ptr<Expr<Object>>right = primary();
+        return shared_ptr<Expr<Object>> (new Unary<Object> {token, right});
     }
     return primary();
 }
 
-Expr<Object>* Parser::primary() {
+shared_ptr<Expr<Object>> Parser::primary() {
     if(match({ TokenType::FALSE })) {
-        return new Literal<Object> { Object::make_bool_obj(false) };
+        return shared_ptr<Expr<Object>> (new Literal<Object> { Object::make_bool_obj(false) });
     }
     if(match({ TokenType::TRUE })) {
-        return new Literal<Object> { Object::make_bool_obj(true) };
+        return shared_ptr<Expr<Object>> (new Literal<Object> { Object::make_bool_obj(true) });
     }
     if(match({ TokenType::NIL})) {
-        return new Literal<Object> { Object::make_nil_obj() };
+        return shared_ptr<Expr<Object>> (new Literal<Object> { Object::make_nil_obj() });
     }
     if(match({ TokenType::STRING })) {
-        return new Literal<Object> { Object::make_str_obj(tokens[current - 1].literal.str) };
+        return shared_ptr<Expr<Object>> (new Literal<Object> { Object::make_str_obj(tokens[current - 1].literal.str) });
     }
     if(match({ TokenType::NUMBER })) {
-        return new Literal<Object> { Object::make_num_obj(tokens[current - 1].literal.num) };
+        return shared_ptr<Expr<Object>> (new Literal<Object> { Object::make_num_obj(tokens[current - 1].literal.num) });
     }
 
     if(match({ TokenType::LEFT_PAREN })) {
-        Expr<Object> *expr = expression();
+        shared_ptr<Expr<Object>>expr = expression();
         consume(RIGHT_PAREN, "Expect ')' after expression\n");
-        return new Grouping<Object> {expr};
+        return shared_ptr<Expr<Object>> (new Grouping<Object> {expr});
     }
 
     throw error(peek(), "Expected expression.");
@@ -168,3 +195,4 @@ std::runtime_error Parser::error(Token token, std::string message) {
         throw std::runtime_error(std::to_string(token.line) + " at end " + message);
     throw std::runtime_error(std::to_string(token.line) + " at " + token.lexeme);
 }
+

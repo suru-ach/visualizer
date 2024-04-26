@@ -66,14 +66,14 @@ class Grouping : public Expr<T> {
 template<typename T>
 class Literal : public Expr<T> {
 	public:
-		Literal(Token value)
+		Literal(Object value)
 		:value(value) { }
 
 		T accept(Visitor<T> *visitor) {
 			return visitor->visitLiteralExpr(this);
 		}
 
-		Token value;
+		Object value;
 
 
 };

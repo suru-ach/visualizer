@@ -1,7 +1,9 @@
 #ifndef AST_PRINTER_
 #define AST_PRINTER_
 #include "Expr.h"
+#include <memory>
 
+/*
 class AstVisitor: public Visitor<std::string> {
     std::string visitLiteralExpr(Literal<std::string> *expr);
     std::string visitGroupingExpr(Grouping<std::string> *expr);
@@ -9,7 +11,6 @@ class AstVisitor: public Visitor<std::string> {
     std::string visitBinaryExpr(Binary<std::string> *expr);
 };
 
-class AstTraverser: public Visitor<Object> {
     struct ObjectTree {
         ObjectTree(): res{""}, left{nullptr}, right{nullptr} {}
 
@@ -27,10 +28,15 @@ class AstTraverser: public Visitor<Object> {
         ObjectTree* right;
         void print(std::ofstream& ost);
     };
-    Object visitLiteralExpr(Literal<Object> *expr);
-    Object visitGroupingExpr(Grouping<Object> *expr);
-    Object visitUnaryExpr(Unary<Object> *expr);
-    Object visitBinaryExpr(Binary<Object> *expr);
+    */
+class AstTraverser:
+    public Visitor<Object>,
+    std::enable_shared_from_this<AstTraverser>
+{
+    Object visitLiteralExpr(shared_ptr<Literal<Object>> expr);
+    Object visitGroupingExpr(shared_ptr<Grouping<Object>> expr);
+    Object visitUnaryExpr(shared_ptr<Unary<Object>> expr);
+    Object visitBinaryExpr(shared_ptr<Binary<Object>> expr);
 };
 
 #endif // !AST_PRINTER_

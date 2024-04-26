@@ -26,14 +26,14 @@ class Stmt {
 template<typename T>
 class Expression : public Stmt<T> {
 	public:
-		Expression(Expr expression)
+		Expression(Expr<T> expression)
 		:expression(expression) { }
 
 		T accept(Visitor<T> *visitor) {
 			return visitor->visitExpressionStmt(this);
 		}
 
-		Expr expression;
+		Expr<T> expression;
 
 
 };
@@ -41,14 +41,14 @@ class Expression : public Stmt<T> {
 template<typename T>
 class Print : public Stmt<T> {
 	public:
-		Print(Expr expression)
+		Print(Expr<T> expression)
 		:expression(expression) { }
 
 		T accept(Visitor<T> *visitor) {
 			return visitor->visitPrintStmt(this);
 		}
 
-		Expr expression;
+		Expr<T> expression;
 
 
 };
