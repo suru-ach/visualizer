@@ -52,6 +52,7 @@ vector<shared_ptr<Stmt<Object>>> Parser::parse() {
     } catch(std::runtime_error err) {
         return {};
     }
+    return statements;
 }
 
 shared_ptr<Stmt<Object>> Parser::statement() {
@@ -61,6 +62,7 @@ shared_ptr<Stmt<Object>> Parser::statement() {
 }
 
 shared_ptr<Stmt<Object>> Parser::printStatement() {
+    std::cout << "print statement called\n";
     shared_ptr<Expr<Object>> value = expression();
     consume(SEMICOLON, "Expect ';' after value.");
     return shared_ptr<Stmt<Object>> (new Print<Object>{value});
@@ -73,10 +75,12 @@ shared_ptr<Stmt<Object>> Parser::expressionStatement() {
 }
 
 shared_ptr<Expr<Object>> Parser::expression() {
+    std::cout << "expression called\n";
     return equality();
 }
 
 shared_ptr<Expr<Object>> Parser::equality() {
+    std::cout << "equality called\n";
     shared_ptr<Expr<Object>>expr = comparision();
     while(match({ BANG_EQUAL, EQUAL_EQUAL })) {
         Token token = previous();
@@ -87,6 +91,7 @@ shared_ptr<Expr<Object>> Parser::equality() {
 }
 
 shared_ptr<Expr<Object>> Parser::comparision() {
+    std::cout << "equality called\n";
     shared_ptr<Expr<Object>>expr = term();
     while(match({ LESS_EQUAL, GREATER_EQUAL, GREATER, LESS })) {
         Token token = previous(); 
@@ -97,6 +102,7 @@ shared_ptr<Expr<Object>> Parser::comparision() {
 }
 
 shared_ptr<Expr<Object>> Parser::term() {
+    std::cout << "term called\n";
     shared_ptr<Expr<Object>>expr = factor();
     while(match({ PLUS, MINUS })) {
         Token token = previous();
@@ -107,6 +113,7 @@ shared_ptr<Expr<Object>> Parser::term() {
 }
 
 shared_ptr<Expr<Object>> Parser::factor() {
+    std::cout << "factor called\n";
     shared_ptr<Expr<Object>>expr = unary();
     while(match({ STAR, SLASH })) {
         Token token = previous(); 
@@ -117,6 +124,7 @@ shared_ptr<Expr<Object>> Parser::factor() {
 }
 
 shared_ptr<Expr<Object>> Parser::unary() {
+    std::cout << "unary called\n";
     if(match({ BANG, MINUS })) {
         Token token = previous();
         shared_ptr<Expr<Object>>right = primary();
@@ -126,6 +134,7 @@ shared_ptr<Expr<Object>> Parser::unary() {
 }
 
 shared_ptr<Expr<Object>> Parser::primary() {
+    std::cout << "primary called\n";
     if(match({ TokenType::FALSE })) {
         return shared_ptr<Expr<Object>> (new Literal<Object> { Object::make_bool_obj(false) });
     }

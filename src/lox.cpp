@@ -71,7 +71,8 @@ void Lox::run(string source) {
     Parser* parser = new Parser(tokens);
     
     // AstTraverser ast;
-    // vector<shared_ptr<Stmt<Object>>> astTree = parser->parse();
+    vector<shared_ptr<Stmt<Object>>> astTree = parser->parse();
+    cout << astTree.size()<<endl;
     // cout << astTree.size() << endl;
     // Expr<Object>* astTree = parser->parse();
     // astTree->accept(&ast);
