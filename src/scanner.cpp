@@ -39,6 +39,8 @@ Scanner::Scanner(string source)
     
 unordered_map<string, TokenType> Scanner::keywords = {
     {"and",    AND},
+    {"switch", SWITCH},
+    {"case",   CASE},
     {"class",  CLASS},
     {"else",   ELSE},
     {"false",  FALSE},

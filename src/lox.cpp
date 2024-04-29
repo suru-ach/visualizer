@@ -1,6 +1,5 @@
 #include "lox.h" 
 #include "scanner.h"
-#include "astprinter.h"
 #include "parser.h"
 
 #include <iomanip>
@@ -8,6 +7,8 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+
+#define ALLOW_DEBUG 0
 
 using std::string;
 using std::cin;
@@ -26,7 +27,7 @@ std::vector<std::string> Lox::tokenStrings {
         "IDENTIFIER","STRING","NUMBER",
         "AND","CLASS","ELSE","FALSE","FUN","FOR","IF","NIL","OR",
         "PRINT","RETURN","SUPER","THIS","TRUE","VAR","WHILE",
-        "TOKEN_EOF"
+        "TOKEN_EOF","SWITCH","CASE"
 };
 
 int Lox::runScript (int argc, char *argv[])
@@ -65,14 +66,15 @@ void Lox::run(string source) {
     vector<Token> tokens = scanner->scanTokens();
 
     for(auto token: tokens) {
-        cout << std::setw(20) << token.lexeme << std::setw(20)<< tokenStrings[token.type] << endl;
+        if(ALLOW_DEBUG) cout << std::setw(20) << token.lexeme << std::setw(20)<< tokenStrings[token.type] << endl;
     }
 
     Parser* parser = new Parser(tokens);
+    Node* tree_root = parser->parse();
+    cout << parser->traverser(tree_root) << endl;
     
     // AstTraverser ast;
-    vector<shared_ptr<Stmt<Object>>> astTree = parser->parse();
-    cout << astTree.size()<<endl;
+    // cout << astTree.size()<<endl;
     // cout << astTree.size() << endl;
     // Expr<Object>* astTree = parser->parse();
     // astTree->accept(&ast);

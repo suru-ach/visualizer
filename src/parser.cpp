@@ -35,24 +35,97 @@
 #include "parser.h"
 #include "Stmt.h"
 #include "token.h"
-#include <stdexcept>
+#include <fstream>
 #include <string>
 #include <iostream>
 #include <vector>
 
-using std::shared_ptr;
+#define ALLOW_DEBUG 0
 
-vector<shared_ptr<Stmt<Object>>> Parser::parse() {
+/*
+const orgChart = {
+  name: 'CEO',
+  children: [
+    {
+      name: 'Manager',
+      attributes: {
+        department: 'Production',
+      },
+      children: [
+        {
+          name: 'Foreman',
+          attributes: {
+            department: 'Fabrication',
+          },
+          children: [
+            {
+              name: 'Worker',
+            },
+          ],
+        },
+        {
+          name: 'Foreman',
+          attributes: {
+            department: 'Assembly',
+          },
+          children: [
+            {
+              name: 'Worker',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+*/
 
-    try {
-        while(!isAtEnd()) {
-            statements.push_back(statement());
-        }
-        // expression();
-    } catch(std::runtime_error err) {
-        return {};
+string Parser::traverser(Node* root) {
+    if(!root) return "";
+    string res = "{name:'" + root->token.lexeme;
+    if(root->left || root->right) {
+        res += "children: [";
+        res += traverser(root);
+        res += "],";
     }
-    return statements;
+    res += "'},";
+    return res;
+}
+
+void recursive_delete(Node* root) {
+    if(!root) return;
+    recursive_delete(root->left);
+    recursive_delete(root->right);
+    free(root->left);
+    free(root->right);
+}
+
+Parser::~Parser() {
+    for(auto stmt: statements) {
+        recursive_delete(stmt);
+        free(stmt);
+    }    
+}
+
+Node* Parser::parse() {
+    return expression();
+    return nullptr; 
+}
+
+
+/*
+shared_ptr<Stmt<Object>> Parser::declaration() {
+}
+
+shared_ptr<Stmt<Object>> Parser::varDecl() {
+    consume(IDENTIFIER, "Expected type here");
+    consume(IDENTIFIER, "Expected idendifier here");
+    if(match({EQUAL})) {
+        expression();  
+        return nullptr;
+    }
+    consume(SEMICOLON, "Expect ';' after value.");
+    return nullptr;
 }
 
 shared_ptr<Stmt<Object>> Parser::statement() {
@@ -74,8 +147,12 @@ shared_ptr<Stmt<Object>> Parser::expressionStatement() {
     return shared_ptr<Stmt<Object>> (new Expression<Object>{value});
 }
 
+
 shared_ptr<Expr<Object>> Parser::expression() {
     std::cout << "expression called\n";
+    if(match({ IDENTIFIER })) {
+        
+    }
     return equality();
 }
 
@@ -132,29 +209,41 @@ shared_ptr<Expr<Object>> Parser::unary() {
     }
     return primary();
 }
+*/
 
-shared_ptr<Expr<Object>> Parser::primary() {
-    std::cout << "primary called\n";
+Node* Parser::expression() {
+    if(ALLOW_DEBUG) std::cout << "expression called\n";
+    return primary();
+}
+
+Node* Parser::primary() {
+    if(ALLOW_DEBUG) std::cout << "primary called\n";
     if(match({ TokenType::FALSE })) {
-        return shared_ptr<Expr<Object>> (new Literal<Object> { Object::make_bool_obj(false) });
+        return new Node{tokens[current-1]};
     }
     if(match({ TokenType::TRUE })) {
-        return shared_ptr<Expr<Object>> (new Literal<Object> { Object::make_bool_obj(true) });
+        return new Node{tokens[current-1]};
     }
     if(match({ TokenType::NIL})) {
-        return shared_ptr<Expr<Object>> (new Literal<Object> { Object::make_nil_obj() });
+        return new Node{tokens[current-1]};
+    }
+    if(match({ TokenType::IDENTIFIER })) {
+        std::cout << tokens[current-1].lexeme << std::endl;
+        return new Node{tokens[current-1]};
     }
     if(match({ TokenType::STRING })) {
-        return shared_ptr<Expr<Object>> (new Literal<Object> { Object::make_str_obj(tokens[current - 1].literal.str) });
+        std::cout << tokens[current-1].lexeme << std::endl;
+        return new Node{tokens[current-1]};
     }
     if(match({ TokenType::NUMBER })) {
-        return shared_ptr<Expr<Object>> (new Literal<Object> { Object::make_num_obj(tokens[current - 1].literal.num) });
+        std::cout << tokens[current-1].lexeme << std::endl;
+        return new Node{tokens[current-1]};
     }
 
     if(match({ TokenType::LEFT_PAREN })) {
-        shared_ptr<Expr<Object>>expr = expression();
+        Node* expr = expression();
         consume(RIGHT_PAREN, "Expect ')' after expression\n");
-        return shared_ptr<Expr<Object>> (new Grouping<Object> {expr});
+        return expr;
     }
 
     throw error(peek(), "Expected expression.");
