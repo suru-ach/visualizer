@@ -2,3 +2,6 @@
 /build
 /src/meta/generated
 /web
+/web2/node_modules
+/.mono
+/.next
