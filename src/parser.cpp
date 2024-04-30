@@ -172,29 +172,47 @@ shared_ptr<Expr<Object>> Parser::equality() {
     return expr;
 }
 
-shared_ptr<Expr<Object>> Parser::comparision() {
-    std::cout << "equality called\n";
-    shared_ptr<Expr<Object>>expr = term();
-    while(match({ LESS_EQUAL, GREATER_EQUAL, GREATER, LESS })) {
-        Token token = previous(); 
-        shared_ptr<Expr<Object>>right = term();
-        expr = shared_ptr<Expr<Object>> (new Binary<Object> { expr, token, right });
-    }
-    return expr;
-}
-
-shared_ptr<Expr<Object>> Parser::term() {
-    std::cout << "term called\n";
-    shared_ptr<Expr<Object>>expr = factor();
-    while(match({ PLUS, MINUS })) {
-        Token token = previous();
-        shared_ptr<Expr<Object>>right = factor();
-        expr = shared_ptr<Expr<Object>> (new Binary<Object> { expr, token, right });
-    }
-    return expr;
-}
 
 */
+
+Node* Parser::expression() {
+    if(ALLOW_DEBUG) std::cout << "expression called\n";
+    return equality();
+}
+
+Node* Parser::equality() {
+    if(ALLOW_DEBUG) std::cout << "equality called\n";
+    Node* expr = comparision();
+    while(match({ BANG_EQUAL, EQUAL_EQUAL })) {
+        Token token = previous();
+        Node* right = comparision();
+        expr = new Node {token, right, expr}; 
+    }
+    return expr;
+}
+
+
+Node* Parser::comparision() {
+    if(ALLOW_DEBUG) std::cout << "equality called\n";
+    Node* expr = term();
+    while(match({ LESS_EQUAL, GREATER_EQUAL, GREATER, LESS })) {
+        Token token = previous();
+        Node* right = term();
+        expr = new Node {token, right, expr}; 
+    }
+    return expr;
+}
+
+Node* Parser::term() {
+    if(ALLOW_DEBUG) std::cout << "term called\n";
+    Node* expr = factor();
+    while(match({ PLUS, MINUS })) {
+        Token token = previous();
+        Node* right = factor();
+        expr = new Node {token, right, expr}; 
+    }
+    return expr;
+}
 
 Node* Parser::factor() {
     if(ALLOW_DEBUG) std::cout << "factor called\n";
@@ -219,11 +237,6 @@ Node* Parser::unary() {
         return new Node {token, right};
     }
     return primary();
-}
-
-Node* Parser::expression() {
-    if(ALLOW_DEBUG) std::cout << "expression called\n";
-    return factor();
 }
 
 Node* Parser::primary() {

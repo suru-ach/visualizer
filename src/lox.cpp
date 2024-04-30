@@ -8,7 +8,7 @@
 #include <iostream>
 #include <fstream>
 
-#define ALLOW_DEBUG 0
+#define ALLOW_DEBUG 1
 
 using std::string;
 using std::cin;
