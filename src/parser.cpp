@@ -83,12 +83,12 @@ const orgChart = {
 
 string Parser::traverser(Node* root) {
     if(!root) return "";
-    string res = "{name:'" + root->token.lexeme + "', ";
+    string res = "{\"name\":\"" + root->token.lexeme + "\"";
     if(root->left || root->right) {
-        res += "children: [";
+        res += ",\"children\": [";
         res += traverser(root->left) + "," ;
         res += traverser(root->right);
-        res += "],";
+        res += "]";
     }
     res += "}";
     return res;
