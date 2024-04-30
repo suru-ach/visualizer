@@ -1,5 +1,5 @@
 Expr
 Binary:Expr<T>* left,Token operator_,Expr<T>* right
 Grouping:Expr<T>* expression
-Literal:Token value
+Literal:Object value
 Unary:Token operator_,Expr<T>* right

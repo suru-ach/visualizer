@@ -5,6 +5,7 @@ a.out:
 	# ./a.out filename
 
 clean:
-	rm a.out
+	rm a.out 
+	rm -rf ./generated
 
 
