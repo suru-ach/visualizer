@@ -1,18 +1,21 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.10)
 
-project(visualizer)
+project(Lox)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/googletest)
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/googletest)
 
-# set sources here
 set(SOURCES
-
+    src/lox.cpp
+    src/scanner.cpp
+    src/token.cpp
+    #src/astprinter.cpp
+    src/parser.cpp
 )
 
-# set test sources here
 set(TEST_SOURCES
     test/test.cpp
 )
 
-add_executable(visualizer ${SOURCES} ${TEST_SOURCES})
-target_link_libraries(visualizer gtest gtest_main)
+add_executable(lox ${SOURCES} ${TEST_SOURCES})
+
+#target_link_libraries(lox gtest gtest_main)

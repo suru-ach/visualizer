@@ -13,5 +13,13 @@ done
 
 for file in `ls *.h`
 do
+    `cp $file ../`
     `mv $file ./generated`
 done
+
+<<'end'
+for file in `ls generated`
+do
+    `mv $file ../`
+done
+end
