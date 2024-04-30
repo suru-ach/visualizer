@@ -36,6 +36,7 @@
 #include "Stmt.h"
 #include "token.h"
 #include <fstream>
+#include <stdexcept>
 #include <string>
 #include <iostream>
 #include <vector>
@@ -82,13 +83,14 @@ const orgChart = {
 
 string Parser::traverser(Node* root) {
     if(!root) return "";
-    string res = "{name:'" + root->token.lexeme;
+    string res = "{name:'" + root->token.lexeme + "', ";
     if(root->left || root->right) {
         res += "children: [";
-        res += traverser(root);
+        res += traverser(root->left) + "," ;
+        res += traverser(root->right);
         res += "],";
     }
-    res += "'},";
+    res += "}";
     return res;
 }
 
@@ -96,20 +98,23 @@ void recursive_delete(Node* root) {
     if(!root) return;
     recursive_delete(root->left);
     recursive_delete(root->right);
-    free(root->left);
-    free(root->right);
+    delete (root->left);
+    delete (root->right);
 }
 
 Parser::~Parser() {
     for(auto stmt: statements) {
         recursive_delete(stmt);
-        free(stmt);
     }    
 }
 
 Node* Parser::parse() {
-    return expression();
-    return nullptr; 
+    try {
+        return expression();
+    } catch(std::runtime_error error) {
+        std::cerr << error.what() << std::endl;
+    }
+    return nullptr;
 }
 
 
@@ -189,31 +194,36 @@ shared_ptr<Expr<Object>> Parser::term() {
     return expr;
 }
 
-shared_ptr<Expr<Object>> Parser::factor() {
-    std::cout << "factor called\n";
-    shared_ptr<Expr<Object>>expr = unary();
+*/
+
+Node* Parser::factor() {
+    if(ALLOW_DEBUG) std::cout << "factor called\n";
+    Node* expr = unary();
     while(match({ STAR, SLASH })) {
         Token token = previous(); 
-        shared_ptr<Expr<Object>>right = unary();
-        expr = shared_ptr<Expr<Object>> (new Binary<Object> { expr, token, right });
+        Node* right = unary();
+        // Node* tmp = expr;
+        expr = new Node {token, right, expr}; 
+        if(ALLOW_DEBUG) std::cout << "right: " << expr->right->token.lexeme<< "\n";
+        if(ALLOW_DEBUG) std::cout << "left: " << expr->left->token.lexeme << "\n";
+        // expr = new Node {token, right, tmp};
     }
     return expr;
 }
 
-shared_ptr<Expr<Object>> Parser::unary() {
-    std::cout << "unary called\n";
+Node* Parser::unary() {
+    if(ALLOW_DEBUG) std::cout << "unary called\n";
     if(match({ BANG, MINUS })) {
         Token token = previous();
-        shared_ptr<Expr<Object>>right = primary();
-        return shared_ptr<Expr<Object>> (new Unary<Object> {token, right});
+        Node* right = primary();
+        return new Node {token, right};
     }
     return primary();
 }
-*/
 
 Node* Parser::expression() {
     if(ALLOW_DEBUG) std::cout << "expression called\n";
-    return primary();
+    return factor();
 }
 
 Node* Parser::primary() {
@@ -228,15 +238,15 @@ Node* Parser::primary() {
         return new Node{tokens[current-1]};
     }
     if(match({ TokenType::IDENTIFIER })) {
-        std::cout << tokens[current-1].lexeme << std::endl;
+        if(ALLOW_DEBUG) std::cout << tokens[current-1].lexeme << std::endl;
         return new Node{tokens[current-1]};
     }
     if(match({ TokenType::STRING })) {
-        std::cout << tokens[current-1].lexeme << std::endl;
+        if(ALLOW_DEBUG) std::cout << tokens[current-1].lexeme << std::endl;
         return new Node{tokens[current-1]};
     }
     if(match({ TokenType::NUMBER })) {
-        std::cout << tokens[current-1].lexeme << std::endl;
+        if(ALLOW_DEBUG) std::cout << tokens[current-1].lexeme << std::endl;
         return new Node{tokens[current-1]};
     }
 

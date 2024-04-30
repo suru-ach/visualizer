@@ -72,7 +72,7 @@ void Lox::run(string source) {
     Parser* parser = new Parser(tokens);
     Node* tree_root = parser->parse();
     cout << parser->traverser(tree_root) << endl;
-    
+
     // AstTraverser ast;
     // cout << astTree.size()<<endl;
     // cout << astTree.size() << endl;
