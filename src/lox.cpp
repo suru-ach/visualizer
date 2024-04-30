@@ -8,7 +8,7 @@
 #include <iostream>
 #include <fstream>
 
-#define ALLOW_DEBUG 1
+#define ALLOW_DEBUG 0
 
 using std::string;
 using std::cin;
@@ -70,8 +70,10 @@ void Lox::run(string source) {
     }
 
     Parser* parser = new Parser(tokens);
-    Node* tree_root = parser->parse();
-    cout << parser->traverser(tree_root) << endl;
+    vector<Node*> tree_root = parser->parse();
+    for(auto tree: tree_root) {
+        // cout << parser->traverser(tree) << endl;
+    }
 
     // AstTraverser ast;
     // cout << astTree.size()<<endl;

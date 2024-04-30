@@ -43,44 +43,6 @@
 
 #define ALLOW_DEBUG 0
 
-/*
-const orgChart = {
-  name: 'CEO',
-  children: [
-    {
-      name: 'Manager',
-      attributes: {
-        department: 'Production',
-      },
-      children: [
-        {
-          name: 'Foreman',
-          attributes: {
-            department: 'Fabrication',
-          },
-          children: [
-            {
-              name: 'Worker',
-            },
-          ],
-        },
-        {
-          name: 'Foreman',
-          attributes: {
-            department: 'Assembly',
-          },
-          children: [
-            {
-              name: 'Worker',
-            },
-          ],
-        },
-      ],
-    },
-  ],
-};
-*/
-
 string Parser::traverser(Node* root) {
     if(!root) return "";
     string res = "{\"name\":\"" + root->token.lexeme + "\"";
@@ -106,15 +68,6 @@ Parser::~Parser() {
     for(auto stmt: statements) {
         recursive_delete(stmt);
     }    
-}
-
-Node* Parser::parse() {
-    try {
-        return expression();
-    } catch(std::runtime_error error) {
-        std::cerr << error.what() << std::endl;
-    }
-    return nullptr;
 }
 
 
@@ -175,9 +128,107 @@ shared_ptr<Expr<Object>> Parser::equality() {
 
 */
 
+vector<Node*> Parser::parse() {
+    try {
+        vector<Node*> statements;
+        while(!isAtEnd()) {
+            Node* expr = declaration();
+            std::cout << traverser(expr);
+            statements.push_back(expr);
+        }
+        //return expression();
+    } catch(std::runtime_error error) {
+        std::cerr << error.what() << std::endl;
+    }
+    return {};
+}
+
+Node* Parser::varDecl() {
+    Token name = consume(IDENTIFIER, "Expect variable name.");
+    Node* vardec = new Node(name);
+    
+    if(match({ EQUAL })) {
+        vardec->left = expression();   
+    }
+
+    consume(SEMICOLON, "Expect ';' after value");
+    return vardec;
+}
+
+Node* Parser::declaration() {
+    if(match({ VAR })) return varDecl();
+
+    return statement();
+}
+        
+Node* Parser::statement() {
+    if(match({ TokenType::PRINT })) return printStatement();
+    if(match({ TokenType::IF })) return ifStmt();
+    if(match({ TokenType::WHILE })) return whileStatement();
+    return expressionStatement();
+}
+
+/*
+private Stmt whileStatement() {
+    consume(LEFT_PAREN, "Expect '(' after 'while'.");
+    Expr condition = expression();
+    consume(RIGHT_PAREN, "Expect ')' after condition.");
+    Stmt body = statement();
+
+    return new Stmt.While(condition, body);
+  } */
+
+Node* Parser::whileStatement() {
+    consume(LEFT_PAREN, "Expect '(' after 'if'.");   
+    Node* condition = expression();
+    consume(RIGHT_PAREN, "Expect '(' after if condition.");   
+
+    Node* body = statement();
+    condition->left = body;
+    return condition;
+}
+
+Node* Parser::ifStmt() {
+    consume(LEFT_PAREN, "Expect '(' after 'if'.");   
+    Node* condition = expression();
+    consume(RIGHT_PAREN, "Expect '(' after if condition.");   
+
+    Node* thenBranch = statement();
+    condition->left = thenBranch;;
+    Node* elseBranch = nullptr;
+    if (match({ELSE})) {
+        elseBranch = statement();
+        condition->right = elseBranch;
+    }
+    return condition;
+}
+
+Node* Parser::printStatement() {
+    Node* expr = expression(); 
+    consume(SEMICOLON, "Expect ';' after value");
+    return expr;
+}
+
+Node* Parser::expressionStatement() {
+    Node* expr = expression(); 
+    consume(SEMICOLON, "Expect ';' after value");
+    return expr;
+}
+
+Node* Parser::assignment() {
+    Node* expr = equality();
+
+    if(match({EQUAL})) {
+        Token equals = previous(); 
+        Node* value = expression();
+        expr->left = value;
+    }
+
+    return expr;
+}
+
 Node* Parser::expression() {
-    if(ALLOW_DEBUG) std::cout << "expression called\n";
-    return equality();
+    return assignment();
 }
 
 Node* Parser::equality() {

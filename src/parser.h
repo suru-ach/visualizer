@@ -33,13 +33,22 @@ class Parser {
         ~Parser();
         vector<Token> tokens;
         int current;
-        Node* parse();
+        vector<Node*> parse();
         vector<Node*> statements;
         //shared_ptr<Stmt<Object>> statement();
         //shared_ptr<Stmt<Object>> varDecl();
         //shared_ptr<Stmt<Object>> declaration();
         //shared_ptr<Stmt<Object>> printStatement();
         //shared_ptr<Stmt<Object>> expressionStatement();
+
+        Node* whileStatement();
+        Node* ifStmt();
+        Node* assignment();
+        Node* varDecl();
+        Node* declaration();
+        Node* printStatement();
+        Node* expressionStatement();
+        Node* statement();
         Node* expression(); 
         Node* equality(); 
         Node* comparision();
