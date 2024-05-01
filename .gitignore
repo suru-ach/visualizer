@@ -3,5 +3,7 @@
 /src/meta/generated
 /web
 /web2/node_modules
-/.mono
-/.next
+/web2/.mono
+/web2/.next
+/web2/test.txt
+/web2/out.json
