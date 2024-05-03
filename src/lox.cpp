@@ -71,9 +71,9 @@ void Lox::run(string source) {
 
     Parser* parser = new Parser(tokens);
     vector<Node*> tree_root = parser->parse();
-    for(auto tree: tree_root) {
+    //for(auto tree: tree_root) {
         // cout << parser->traverser(tree) << endl;
-    }
+    //}
 
     // AstTraverser ast;
     // cout << astTree.size()<<endl;

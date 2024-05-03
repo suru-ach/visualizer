@@ -18,4 +18,11 @@ set(TEST_SOURCES
 
 add_executable(lox ${SOURCES} ${TEST_SOURCES})
 
+# then add the custom command to copy it
+add_custom_command(
+  TARGET lox 
+  POST_BUILD
+  COMMAND ${CMAKE_COMMAND}
+  ARGS -E copy $<TARGET_FILE:lox> ../web2
+  )
 #target_link_libraries(lox gtest gtest_main)

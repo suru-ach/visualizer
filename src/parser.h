@@ -56,7 +56,7 @@ class Parser {
         Node* factor();
         Node* unary();
         Node* primary();
-        bool match(std::initializer_list<TokenType> type);
+        bool match(std::vector<TokenType> type);
         bool check(TokenType type);
         Token advance();
         bool isAtEnd();

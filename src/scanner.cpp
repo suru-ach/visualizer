@@ -106,7 +106,7 @@ void Scanner::scanToken() {
         case '\n':
             line++;
             break;
-        case '"':
+        case '\'':
             generateString();
             break;
         default:
@@ -145,7 +145,7 @@ bool Scanner::match(char expected) {
 }
 
 void Scanner::generateString() {
-    while(peek() != '"' && !isAtEnd()) {
+    while(peek() != '\'' && !isAtEnd()) {
         if(peek() == '\n') line++;
         advance();
     }

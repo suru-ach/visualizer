@@ -22,7 +22,7 @@
         Expr<Object> factor();
         Expr<Object> unary();
         Expr<Object> primary();
-        bool match(std::initializer_list<TokenType> type);
+        bool match(vector(std::initializer_list<TokenType> type);
         bool check(TokenType type);
         bool advance();
         bool isAtEnd();
@@ -34,6 +34,7 @@
 
 #include "parser.h"
 #include "Stmt.h"
+#include "lox.h"
 #include "token.h"
 #include <fstream>
 #include <stdexcept>
@@ -46,12 +47,20 @@
 string Parser::traverser(Node* root) {
     if(!root) return "";
     string res = "{\"name\":\"" + root->token.lexeme + "\"";
-    if(root->left || root->right) {
+    if(root->left && root->right) {
         res += ",\"children\": [";
-        res += traverser(root->left) + "," ;
+        res += traverser(root->left) +  ","; 
         res += traverser(root->right);
         res += "]";
-    }
+    }else if(root->left) {
+		res += ",\"children\": [";
+		res += traverser(root->left);
+		res += "]";
+	}else if(root->right) {
+		res += ",\"children\": [";
+		res += traverser(root->right);
+		res += "]";
+	}
     res += "}";
     return res;
 }
@@ -78,7 +87,7 @@ shared_ptr<Stmt<Object>> Parser::declaration() {
 shared_ptr<Stmt<Object>> Parser::varDecl() {
     consume(IDENTIFIER, "Expected type here");
     consume(IDENTIFIER, "Expected idendifier here");
-    if(match({EQUAL})) {
+    if(match(vector({EQUAL})) {
         expression();  
         return nullptr;
     }
@@ -87,7 +96,7 @@ shared_ptr<Stmt<Object>> Parser::varDecl() {
 }
 
 shared_ptr<Stmt<Object>> Parser::statement() {
-    if(match({PRINT})) return printStatement();
+    if(match(vector({PRINT})) return printStatement();
     
     return expressionStatement();
 }
@@ -108,7 +117,7 @@ shared_ptr<Stmt<Object>> Parser::expressionStatement() {
 
 shared_ptr<Expr<Object>> Parser::expression() {
     std::cout << "expression called\n";
-    if(match({ IDENTIFIER })) {
+    if(match(vector({ IDENTIFIER })) {
         
     }
     return equality();
@@ -117,7 +126,7 @@ shared_ptr<Expr<Object>> Parser::expression() {
 shared_ptr<Expr<Object>> Parser::equality() {
     std::cout << "equality called\n";
     shared_ptr<Expr<Object>>expr = comparision();
-    while(match({ BANG_EQUAL, EQUAL_EQUAL })) {
+    while(match(vector({ BANG_EQUAL, EQUAL_EQUAL })) {
         Token token = previous();
         shared_ptr<Expr<Object>>right = comparision();
         expr = shared_ptr<Expr<Object>> (new Binary<Object> { expr, token, right });
@@ -147,7 +156,7 @@ Node* Parser::varDecl() {
     Token name = consume(IDENTIFIER, "Expect variable name.");
     Node* vardec = new Node(name);
     
-    if(match({ EQUAL })) {
+    if(match(vector({ EQUAL }))) {
         vardec->left = expression();   
     }
 
@@ -156,15 +165,15 @@ Node* Parser::varDecl() {
 }
 
 Node* Parser::declaration() {
-    if(match({ VAR })) return varDecl();
+    if(match(vector({ VAR }))) return varDecl();
 
     return statement();
 }
         
 Node* Parser::statement() {
-    if(match({ TokenType::PRINT })) return printStatement();
-    if(match({ TokenType::IF })) return ifStmt();
-    if(match({ TokenType::WHILE })) return whileStatement();
+    if(match(vector({ TokenType::PRINT }))) return printStatement();
+    if(match(vector({ TokenType::IF }))) return ifStmt();
+    if(match(vector({ TokenType::WHILE }))) return whileStatement();
     return expressionStatement();
 }
 
@@ -196,7 +205,7 @@ Node* Parser::ifStmt() {
     Node* thenBranch = statement();
     condition->left = thenBranch;;
     Node* elseBranch = nullptr;
-    if (match({ELSE})) {
+    if (match(vector({ELSE}))) {
         elseBranch = statement();
         condition->right = elseBranch;
     }
@@ -218,10 +227,10 @@ Node* Parser::expressionStatement() {
 Node* Parser::assignment() {
     Node* expr = equality();
 
-    if(match({EQUAL})) {
+    if(match(vector({EQUAL}))) {
         Token equals = previous(); 
         Node* value = expression();
-        expr->left = value;
+        expr->right = value;
     }
 
     return expr;
@@ -234,7 +243,7 @@ Node* Parser::expression() {
 Node* Parser::equality() {
     if(ALLOW_DEBUG) std::cout << "equality called\n";
     Node* expr = comparision();
-    while(match({ BANG_EQUAL, EQUAL_EQUAL })) {
+    while(match(std::vector<TokenType>( BANG_EQUAL, EQUAL_EQUAL ))) {
         Token token = previous();
         Node* right = comparision();
         expr = new Node {token, right, expr}; 
@@ -246,7 +255,7 @@ Node* Parser::equality() {
 Node* Parser::comparision() {
     if(ALLOW_DEBUG) std::cout << "equality called\n";
     Node* expr = term();
-    while(match({ LESS_EQUAL, GREATER_EQUAL, GREATER, LESS })) {
+    while(match(vector({ LESS_EQUAL, GREATER_EQUAL, GREATER, LESS }))) {
         Token token = previous();
         Node* right = term();
         expr = new Node {token, right, expr}; 
@@ -257,7 +266,7 @@ Node* Parser::comparision() {
 Node* Parser::term() {
     if(ALLOW_DEBUG) std::cout << "term called\n";
     Node* expr = factor();
-    while(match({ PLUS, MINUS })) {
+    while(match(vector({ MINUS, PLUS}))) {
         Token token = previous();
         Node* right = factor();
         expr = new Node {token, right, expr}; 
@@ -268,7 +277,7 @@ Node* Parser::term() {
 Node* Parser::factor() {
     if(ALLOW_DEBUG) std::cout << "factor called\n";
     Node* expr = unary();
-    while(match({ STAR, SLASH })) {
+    while(match(vector({ SLASH, STAR}))) {
         Token token = previous(); 
         Node* right = unary();
         // Node* tmp = expr;
@@ -282,7 +291,7 @@ Node* Parser::factor() {
 
 Node* Parser::unary() {
     if(ALLOW_DEBUG) std::cout << "unary called\n";
-    if(match({ BANG, MINUS })) {
+    if(match(vector({ BANG, MINUS }))) {
         Token token = previous();
         Node* right = primary();
         return new Node {token, right};
@@ -292,29 +301,29 @@ Node* Parser::unary() {
 
 Node* Parser::primary() {
     if(ALLOW_DEBUG) std::cout << "primary called\n";
-    if(match({ TokenType::FALSE })) {
+    if(match(vector({ TokenType::FALSE }))) {
         return new Node{tokens[current-1]};
     }
-    if(match({ TokenType::TRUE })) {
+    if(match(vector({ TokenType::TRUE }))) {
         return new Node{tokens[current-1]};
     }
-    if(match({ TokenType::NIL})) {
+    if(match(vector({ TokenType::NIL}))) {
         return new Node{tokens[current-1]};
     }
-    if(match({ TokenType::IDENTIFIER })) {
+    if(match(vector({ TokenType::IDENTIFIER }))) {
         if(ALLOW_DEBUG) std::cout << tokens[current-1].lexeme << std::endl;
         return new Node{tokens[current-1]};
     }
-    if(match({ TokenType::STRING })) {
+    if(match(vector({ TokenType::STRING }))) {
         if(ALLOW_DEBUG) std::cout << tokens[current-1].lexeme << std::endl;
         return new Node{tokens[current-1]};
     }
-    if(match({ TokenType::NUMBER })) {
+    if(match(vector({ TokenType::NUMBER }))) {
         if(ALLOW_DEBUG) std::cout << tokens[current-1].lexeme << std::endl;
         return new Node{tokens[current-1]};
     }
 
-    if(match({ TokenType::LEFT_PAREN })) {
+    if(match(vector({ TokenType::LEFT_PAREN }))) {
         Node* expr = expression();
         consume(RIGHT_PAREN, "Expect ')' after expression\n");
         return expr;
@@ -323,15 +332,14 @@ Node* Parser::primary() {
     throw error(peek(), "Expected expression.");
 }
 
-bool Parser::match(std::initializer_list<TokenType> types) {
+bool Parser::match(std::vector<TokenType> types) {
     for(auto type: types) {
         if(check(type)) {
             advance();
             return true;
         }
-        return false;
     }
-    return true;
+        return false;
 }
 
 bool Parser::check(TokenType type) {
