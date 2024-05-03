@@ -24,7 +24,10 @@ enum TokenType {
 
   TOKEN_EOF,
   SWITCH,
-  CASE
+  CASE,
+  BREAK,
+  COLON,
+  DEFAULT
 };
 
 class Object {

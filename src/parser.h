@@ -41,6 +41,9 @@ class Parser {
         //shared_ptr<Stmt<Object>> printStatement();
         //shared_ptr<Stmt<Object>> expressionStatement();
 
+        Node* blockStatement();
+        Node* switchStatement();
+        Node* breakStatement();
         Node* whileStatement();
         Node* ifStmt();
         Node* assignment();

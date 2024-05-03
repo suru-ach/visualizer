@@ -8,7 +8,7 @@
 #include <iostream>
 #include <fstream>
 
-#define ALLOW_DEBUG 0
+#define ALLOW_DEBUG 1
 
 using std::string;
 using std::cin;
@@ -27,7 +27,7 @@ std::vector<std::string> Lox::tokenStrings {
         "IDENTIFIER","STRING","NUMBER",
         "AND","CLASS","ELSE","FALSE","FUN","FOR","IF","NIL","OR",
         "PRINT","RETURN","SUPER","THIS","TRUE","VAR","WHILE",
-        "TOKEN_EOF","SWITCH","CASE"
+        "TOKEN_EOF","SWITCH","CASE","BREAK","COLON","DEFAULT"
 };
 
 int Lox::runScript (int argc, char *argv[])

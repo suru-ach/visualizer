@@ -56,6 +56,8 @@ unordered_map<string, TokenType> Scanner::keywords = {
     {"true",   TRUE},
     {"var",    VAR},
     {"while",  WHILE},
+    {"default",  DEFAULT},
+    {"break",  BREAK}
 };
 
 vector<Token> Scanner::scanTokens() {
@@ -85,6 +87,7 @@ void Scanner::scanToken() {
         case '-': addToken(MINUS); break;
         case '+': addToken(PLUS); break;
         case ';': addToken(SEMICOLON); break;
+        case ':': addToken(COLON); break;
         case '*': addToken(STAR); break;
         case '!': addToken(match('=') ? BANG_EQUAL : BANG); break;
         case '=': addToken(match('=') ? EQUAL_EQUAL : EQUAL); break;

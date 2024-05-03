@@ -1,0 +1,15 @@
+switch (a+b) {
+    case '1':
+        {
+            print('a');
+            break;
+            }
+    case '4':
+        {
+            print('5');
+            break;
+            }
+    default: {
+        break;
+        }
+}

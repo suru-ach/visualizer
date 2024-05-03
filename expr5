@@ -1,0 +1,22 @@
+switch(a<b)
+{
+    case 'a': 
+        {
+        print('c');
+        break;
+        }
+    case 'b': 
+        {
+        print(a+b);
+        break;
+        }
+    case 'c': 
+        {
+        print(a+b);
+        break;
+        }
+    default:
+        {
+            print(a+c+d);
+        }
+}

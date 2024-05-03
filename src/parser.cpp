@@ -42,7 +42,7 @@
 #include <iostream>
 #include <vector>
 
-#define ALLOW_DEBUG 0
+#define ALLOW_DEBUG 1
 
 string Parser::traverser(Node* root) {
     if(!root) return "";
@@ -79,64 +79,6 @@ Parser::~Parser() {
     }    
 }
 
-
-/*
-shared_ptr<Stmt<Object>> Parser::declaration() {
-}
-
-shared_ptr<Stmt<Object>> Parser::varDecl() {
-    consume(IDENTIFIER, "Expected type here");
-    consume(IDENTIFIER, "Expected idendifier here");
-    if(match(vector({EQUAL})) {
-        expression();  
-        return nullptr;
-    }
-    consume(SEMICOLON, "Expect ';' after value.");
-    return nullptr;
-}
-
-shared_ptr<Stmt<Object>> Parser::statement() {
-    if(match(vector({PRINT})) return printStatement();
-    
-    return expressionStatement();
-}
-
-shared_ptr<Stmt<Object>> Parser::printStatement() {
-    std::cout << "print statement called\n";
-    shared_ptr<Expr<Object>> value = expression();
-    consume(SEMICOLON, "Expect ';' after value.");
-    return shared_ptr<Stmt<Object>> (new Print<Object>{value});
-}
-
-shared_ptr<Stmt<Object>> Parser::expressionStatement() {
-    shared_ptr<Expr<Object>> value = expression();
-    consume(SEMICOLON, "Expect ';' after value.");
-    return shared_ptr<Stmt<Object>> (new Expression<Object>{value});
-}
-
-
-shared_ptr<Expr<Object>> Parser::expression() {
-    std::cout << "expression called\n";
-    if(match(vector({ IDENTIFIER })) {
-        
-    }
-    return equality();
-}
-
-shared_ptr<Expr<Object>> Parser::equality() {
-    std::cout << "equality called\n";
-    shared_ptr<Expr<Object>>expr = comparision();
-    while(match(vector({ BANG_EQUAL, EQUAL_EQUAL })) {
-        Token token = previous();
-        shared_ptr<Expr<Object>>right = comparision();
-        expr = shared_ptr<Expr<Object>> (new Binary<Object> { expr, token, right });
-    }
-    return expr;
-}
-
-
-*/
-
 vector<Node*> Parser::parse() {
     try {
         vector<Node*> statements;
@@ -171,9 +113,12 @@ Node* Parser::declaration() {
 }
         
 Node* Parser::statement() {
-    if(match(vector({ TokenType::PRINT }))) return printStatement();
-    if(match(vector({ TokenType::IF }))) return ifStmt();
-    if(match(vector({ TokenType::WHILE }))) return whileStatement();
+    if(match({ TokenType::PRINT })) return printStatement();
+    if(match({ TokenType::IF })) return ifStmt();
+    if(match({ TokenType::WHILE })) return whileStatement();
+    if(match({ TokenType::LEFT_BRACE })) return blockStatement();
+    if(match({ TokenType::SWITCH })) return switchStatement();
+    if(match({ TokenType::BREAK })) return breakStatement();
     return expressionStatement();
 }
 
@@ -186,6 +131,41 @@ private Stmt whileStatement() {
 
     return new Stmt.While(condition, body);
   } */
+
+Node* Parser::switchStatement() {
+    bool key = true;    
+    consume(LEFT_PAREN, "Expected '(' after switch.");
+    Node* condition = expression();
+    consume(RIGHT_PAREN, "Expected ')' after condition.");
+    consume(LEFT_BRACE, "Expected '{' after switch statement.");
+    while(match({ DEFAULT, CASE })) {
+        Token prev = previous();
+        if(ALLOW_DEBUG) std::cout << prev.lexeme << " case\n";
+        if(prev.type == DEFAULT) {
+            consume(COLON, "Expected ':'");
+        } else {
+            primary();
+            consume(COLON, "Expected ':'");
+        }
+        statement();
+    }
+    consume(RIGHT_BRACE, "Expected '}' after switch statement.");
+    return condition;
+}
+
+Node* Parser::breakStatement() {
+    consume(SEMICOLON, "Expected ';' after 'break'.");
+    return nullptr;
+}
+
+Node* Parser::blockStatement() {
+    Node* statement;
+    while(!check(RIGHT_BRACE) && !isAtEnd()) {
+        statement = declaration();
+    } 
+    consume(RIGHT_BRACE, "Expected '}' after switch statement.");
+    return statement;
+}
 
 Node* Parser::whileStatement() {
     consume(LEFT_PAREN, "Expect '(' after 'if'.");   
@@ -339,7 +319,7 @@ bool Parser::match(std::vector<TokenType> types) {
             return true;
         }
     }
-        return false;
+    return false;
 }
 
 bool Parser::check(TokenType type) {
@@ -371,7 +351,7 @@ Token Parser::consume(TokenType token, std::string message) {
 }
 
 std::runtime_error Parser::error(Token token, std::string message) {
-    if(token.type == TOKEN_EOF)
+    if(token.type != TOKEN_EOF)
         throw std::runtime_error(std::to_string(token.line) + " at end " + message);
     throw std::runtime_error(std::to_string(token.line) + " at " + token.lexeme);
 }
